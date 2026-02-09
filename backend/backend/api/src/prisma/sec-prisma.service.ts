@@ -16,8 +16,12 @@ export class SecPrismaService
       ? (process.env.DATABASE_URL_STAGING || process.env.DATABASE_URL)
       : (process.env.DATABASE_URL_DEV || process.env.DATABASE_URL);
 
+    if (!dbUrl) {
+      throw new Error('DATABASE_URL is not defined. Please set DATABASE_URL or environment-specific URL.');
+    }
+
     const pool = new Pool({
-      connectionString: dbUrl!,
+      connectionString: dbUrl,
       ssl: { rejectUnauthorized: false },
     })
 
