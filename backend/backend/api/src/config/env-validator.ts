@@ -1,17 +1,17 @@
 /**
  * Environment Variable Validator
- * 
+ *
  * Validates required environment variables on app startup.
  * Fails fast if critical configuration is missing.
- * 
+ *
  * Philosophy: Silent failure = dangerous
  */
 
 type EnvVar = {
-  key: string
-  required: boolean
-  description: string
-}
+  key: string;
+  required: boolean;
+  description: string;
+};
 
 const REQUIRED_ENV_VARS: EnvVar[] = [
   {
@@ -34,7 +34,7 @@ const REQUIRED_ENV_VARS: EnvVar[] = [
     required: true,
     description: 'Environment (development/staging/production)',
   },
-]
+];
 
 const OPTIONAL_ENV_VARS: EnvVar[] = [
   {
@@ -65,7 +65,8 @@ const OPTIONAL_ENV_VARS: EnvVar[] = [
   {
     key: 'ALERT_BALANCE_MISMATCH_THRESHOLD',
     required: false,
-    description: 'Balance mismatch alert threshold in dollars (defaults to 0.01)',
+    description:
+      'Balance mismatch alert threshold in dollars (defaults to 0.01)',
   },
   {
     key: 'ALERT_WEBHOOK_FAILURE_THRESHOLD',
@@ -80,9 +81,10 @@ const OPTIONAL_ENV_VARS: EnvVar[] = [
   {
     key: 'ALERT_CREDIT_SPIKE_THRESHOLD',
     required: false,
-    description: 'Credit spike threshold per minute in dollars (defaults to 1000)',
+    description:
+      'Credit spike threshold per minute in dollars (defaults to 1000)',
   },
-]
+];
 
 export class EnvironmentValidator {
   /**
@@ -90,113 +92,121 @@ export class EnvironmentValidator {
    * Throws error if any required var is missing
    */
   static validate(): void {
-    const missing: EnvVar[] = []
-    const warnings: string[] = []
+    const missing: EnvVar[] = [];
+    const warnings: string[] = [];
 
     // Check NODE_ENV first (needed for database URL validation)
-    const nodeEnv = process.env.NODE_ENV
+    const nodeEnv = process.env.NODE_ENV;
     if (!nodeEnv || nodeEnv.trim() === '') {
-      console.error('\n❌ CRITICAL: NODE_ENV is required\n')
-      throw new Error('NODE_ENV environment variable must be set')
+      console.error('\n❌ CRITICAL: NODE_ENV is required\n');
+      throw new Error('NODE_ENV environment variable must be set');
     }
 
     // Check database URL based on NODE_ENV
-    let dbUrl: string | undefined
+    let dbUrl: string | undefined;
     if (nodeEnv === 'production') {
-      dbUrl = process.env.DATABASE_URL_PROD
+      dbUrl = process.env.DATABASE_URL_PROD;
       if (!dbUrl || dbUrl.trim() === '') {
         missing.push({
           key: 'DATABASE_URL_PROD',
           required: true,
-          description: 'Production PostgreSQL connection string (NODE_ENV=production)',
-        })
+          description:
+            'Production PostgreSQL connection string (NODE_ENV=production)',
+        });
       }
     } else if (nodeEnv === 'staging') {
-      dbUrl = process.env.DATABASE_URL_STAGING
+      dbUrl = process.env.DATABASE_URL_STAGING;
       if (!dbUrl || dbUrl.trim() === '') {
         missing.push({
           key: 'DATABASE_URL_STAGING',
           required: true,
-          description: 'Staging PostgreSQL connection string (NODE_ENV=staging)',
-        })
+          description:
+            'Staging PostgreSQL connection string (NODE_ENV=staging)',
+        });
       }
     } else {
-      dbUrl = process.env.DATABASE_URL_DEV
+      dbUrl = process.env.DATABASE_URL_DEV;
       if (!dbUrl || dbUrl.trim() === '') {
         missing.push({
           key: 'DATABASE_URL_DEV',
           required: true,
-          description: 'Development PostgreSQL connection string (NODE_ENV=development)',
-        })
+          description:
+            'Development PostgreSQL connection string (NODE_ENV=development)',
+        });
       }
     }
 
     // Check other required variables (excluding DATABASE_URL which we handled above)
     for (const envVar of REQUIRED_ENV_VARS) {
       if (envVar.key === 'DATABASE_URL' || envVar.key === 'NODE_ENV') {
-        continue // Already validated
+        continue; // Already validated
       }
 
-      const value = process.env[envVar.key]
-      
+      const value = process.env[envVar.key];
+
       if (!value || value.trim() === '') {
-        missing.push(envVar)
+        missing.push(envVar);
       }
     }
 
     // PRODUCTION ONLY: Require CORS_ALLOWED_ORIGINS
     if (nodeEnv === 'production') {
-      const corsOrigins = process.env.CORS_ALLOWED_ORIGINS
+      const corsOrigins = process.env.CORS_ALLOWED_ORIGINS;
       if (!corsOrigins || corsOrigins.trim() === '') {
         missing.push({
           key: 'CORS_ALLOWED_ORIGINS',
           required: true,
-          description: 'Comma-separated list of allowed CORS origins (REQUIRED in production)',
-        })
+          description:
+            'Comma-separated list of allowed CORS origins (REQUIRED in production)',
+        });
       }
     }
 
     // Check optional variables (just warn)
     for (const envVar of OPTIONAL_ENV_VARS) {
-      const value = process.env[envVar.key]
-      
+      const value = process.env[envVar.key];
+
       if (!value || value.trim() === '') {
-        warnings.push(`⚠️  Optional: ${envVar.key} not set (${envVar.description})`)
+        warnings.push(
+          `⚠️  Optional: ${envVar.key} not set (${envVar.description})`,
+        );
       }
     }
 
     // Fail fast if required vars missing
     if (missing.length > 0) {
-      console.error('\n❌ CRITICAL: Missing required environment variables\n')
-      console.error('The following environment variables MUST be set:\n')
-      
+      console.error('\n❌ CRITICAL: Missing required environment variables\n');
+      console.error('The following environment variables MUST be set:\n');
+
       for (const envVar of missing) {
-        console.error(`  ❌ ${envVar.key}`)
-        console.error(`     → ${envVar.description}\n`)
+        console.error(`  ❌ ${envVar.key}`);
+        console.error(`     → ${envVar.description}\n`);
       }
-      
-      console.error('Application cannot start without these variables.')
-      console.error('Set them in your .env file or environment.\n')
-      
+
+      console.error('Application cannot start without these variables.');
+      console.error('Set them in your .env file or environment.\n');
+
       throw new Error(
-        `Missing required environment variables: ${missing.map((v) => v.key).join(', ')}`
-      )
+        `Missing required environment variables: ${missing.map((v) => v.key).join(', ')}`,
+      );
     }
 
     // Log successful validation
-    console.log('✅ Environment variables validated')
-    
+    console.log('✅ Environment variables validated');
+
     if (warnings.length > 0) {
-      console.log('\n⚠️  Optional environment variables not set (using defaults):')
-      warnings.forEach((w) => console.log(`   ${w}`))
-      console.log('')
+      console.log(
+        '\n⚠️  Optional environment variables not set (using defaults):',
+      );
+      warnings.forEach((w) => console.log(`   ${w}`));
+      console.log('');
     }
 
     // Log environment info
-    console.log(`📦 NODE_ENV: ${process.env.NODE_ENV}`)
-    console.log(`🗄️  DATABASE: ${this.maskConnectionString(dbUrl!)}`)
-    console.log(`🔐 JWT_SECRET: ${this.maskSecret(process.env.JWT_SECRET!)}`)
-    console.log('')
+    console.log(`📦 NODE_ENV: ${process.env.NODE_ENV}`);
+    console.log(`🗄️  DATABASE: ${this.maskConnectionString(dbUrl!)}`);
+    console.log(`🔐 JWT_SECRET: ${this.maskSecret(process.env.JWT_SECRET!)}`);
+    console.log('');
   }
 
   /**
@@ -204,13 +214,13 @@ export class EnvironmentValidator {
    */
   private static maskConnectionString(url: string): string {
     try {
-      const parsed = new URL(url)
+      const parsed = new URL(url);
       if (parsed.password) {
-        parsed.password = '***'
+        parsed.password = '***';
       }
-      return parsed.toString()
+      return parsed.toString();
     } catch {
-      return url.substring(0, 20) + '***'
+      return url.substring(0, 20) + '***';
     }
   }
 
@@ -218,9 +228,9 @@ export class EnvironmentValidator {
    * Mask secrets for logging
    */
   private static maskSecret(secret: string): string {
-    if (!secret) return '(not set)'
-    const length = secret.length
-    if (length <= 8) return '***'
-    return `${secret.substring(0, 4)}...${secret.substring(length - 4)} (${length} chars)`
+    if (!secret) return '(not set)';
+    const length = secret.length;
+    if (length <= 8) return '***';
+    return `${secret.substring(0, 4)}...${secret.substring(length - 4)} (${length} chars)`;
   }
 }
