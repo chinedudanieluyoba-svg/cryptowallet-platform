@@ -90,7 +90,25 @@ const OPTIONAL_ENV_VARS: EnvVar[] = [
   },
 ];
 
+// Constants for validation messages
+const PLACEHOLDER_VALUE = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
+const DEPLOYMENT_PLATFORM_INSTRUCTION =
+  'Set it in your deployment platform (e.g., Render Dashboard → Environment)';
+
 export class EnvironmentValidator {
+  /**
+   * Check if a value is empty or contains only whitespace
+   */
+  private static isEmptyOrWhitespace(value: string | undefined): boolean {
+    return !value || value.trim() === '';
+  }
+
+  /**
+   * Check if a value is a placeholder
+   */
+  private static isPlaceholder(value: string | undefined): boolean {
+    return value === PLACEHOLDER_VALUE;
+  }
   /**
    * Validate required environment variables
    * Throws error if any required var is missing
@@ -101,7 +119,7 @@ export class EnvironmentValidator {
 
     // Check NODE_ENV first (needed for database URL validation)
     const nodeEnv = process.env.NODE_ENV;
-    if (!nodeEnv || nodeEnv.trim() === '') {
+    if (this.isEmptyOrWhitespace(nodeEnv)) {
       console.error('\n❌ CRITICAL: NODE_ENV is required\n');
       throw new Error('NODE_ENV environment variable must be set');
     }
@@ -110,7 +128,7 @@ export class EnvironmentValidator {
     let dbUrl: string | undefined;
     if (nodeEnv === 'production') {
       dbUrl = process.env.DATABASE_URL_PROD;
-      if (!dbUrl || dbUrl.trim() === '') {
+      if (this.isEmptyOrWhitespace(dbUrl)) {
         missing.push({
           key: 'DATABASE_URL_PROD',
           required: true,
@@ -120,7 +138,7 @@ export class EnvironmentValidator {
       }
     } else if (nodeEnv === 'staging') {
       dbUrl = process.env.DATABASE_URL_STAGING;
-      if (!dbUrl || dbUrl.trim() === '') {
+      if (this.isEmptyOrWhitespace(dbUrl)) {
         missing.push({
           key: 'DATABASE_URL_STAGING',
           required: true,
@@ -130,7 +148,7 @@ export class EnvironmentValidator {
       }
     } else {
       dbUrl = process.env.DATABASE_URL_DEV;
-      if (!dbUrl || dbUrl.trim() === '') {
+      if (this.isEmptyOrWhitespace(dbUrl)) {
         missing.push({
           key: 'DATABASE_URL_DEV',
           required: true,
@@ -148,11 +166,11 @@ export class EnvironmentValidator {
 
       const value = process.env[envVar.key];
 
-      if (!value || value.trim() === '') {
+      if (this.isEmptyOrWhitespace(value)) {
         missing.push(envVar);
-      } else if (value === 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD') {
+      } else if (this.isPlaceholder(value)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: ${envVar.key} is using a placeholder value. Update it immediately in your deployment platform (e.g., Render Dashboard → Environment).`,
+          `🚨 CRITICAL WARNING: ${envVar.key} is using a placeholder value. Update it immediately in ${DEPLOYMENT_PLATFORM_INSTRUCTION}.`,
         );
       }
     }
@@ -161,13 +179,13 @@ export class EnvironmentValidator {
     for (const envVar of OPTIONAL_SECRETS) {
       const value = process.env[envVar.key];
 
-      if (!value || value.trim() === '') {
+      if (this.isEmptyOrWhitespace(value)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: ${envVar.key} is NOT SET. ${envVar.description}. Set it in your deployment platform (e.g., Render Dashboard → Environment) for full functionality.`,
+          `🚨 CRITICAL WARNING: ${envVar.key} is NOT SET. ${envVar.description}. ${DEPLOYMENT_PLATFORM_INSTRUCTION} for full functionality.`,
         );
-      } else if (value === 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD') {
+      } else if (this.isPlaceholder(value)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: ${envVar.key} is using a placeholder value. Update it immediately in your deployment platform (e.g., Render Dashboard → Environment).`,
+          `🚨 CRITICAL WARNING: ${envVar.key} is using a placeholder value. Update it immediately in ${DEPLOYMENT_PLATFORM_INSTRUCTION}.`,
         );
       }
     }
@@ -175,13 +193,13 @@ export class EnvironmentValidator {
     // PRODUCTION: Warn about CORS_ALLOWED_ORIGINS (allow empty but warn)
     if (nodeEnv === 'production') {
       const corsOrigins = process.env.CORS_ALLOWED_ORIGINS;
-      if (!corsOrigins || corsOrigins.trim() === '') {
+      if (this.isEmptyOrWhitespace(corsOrigins)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is NOT SET in production. CORS will be disabled and API requests from frontend will fail. Set it in your deployment platform (e.g., Render Dashboard → Environment).`,
+          `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is NOT SET in production. CORS will be disabled and API requests from frontend will fail. ${DEPLOYMENT_PLATFORM_INSTRUCTION}.`,
         );
-      } else if (corsOrigins === 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD') {
+      } else if (this.isPlaceholder(corsOrigins)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value. Update it immediately in your deployment platform (e.g., Render Dashboard → Environment).`,
+          `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value. Update it immediately in ${DEPLOYMENT_PLATFORM_INSTRUCTION}.`,
         );
       }
     }
@@ -190,7 +208,7 @@ export class EnvironmentValidator {
     for (const envVar of OPTIONAL_ENV_VARS) {
       const value = process.env[envVar.key];
 
-      if (!value || value.trim() === '') {
+      if (this.isEmptyOrWhitespace(value)) {
         warnings.push(
           `⚠️  Optional: ${envVar.key} not set (${envVar.description})`,
         );
