@@ -92,8 +92,8 @@ const OPTIONAL_ENV_VARS: EnvVar[] = [
 
 // Constants for validation messages
 const PLACEHOLDER_VALUE = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
-const DEPLOYMENT_PLATFORM_INSTRUCTION =
-  'Set it in your deployment platform (e.g., Render Dashboard → Environment)';
+const DEPLOYMENT_PLATFORM_LOCATION =
+  'your deployment platform (e.g., Render Dashboard → Environment)';
 
 export class EnvironmentValidator {
   /**
@@ -170,7 +170,7 @@ export class EnvironmentValidator {
         missing.push(envVar);
       } else if (this.isPlaceholder(value)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: ${envVar.key} is using a placeholder value. Update it immediately in ${DEPLOYMENT_PLATFORM_INSTRUCTION}.`,
+          `🚨 CRITICAL WARNING: ${envVar.key} is using a placeholder value. Update it immediately in ${DEPLOYMENT_PLATFORM_LOCATION}.`,
         );
       }
     }
@@ -181,11 +181,11 @@ export class EnvironmentValidator {
 
       if (this.isEmptyOrWhitespace(value)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: ${envVar.key} is NOT SET. ${envVar.description}. ${DEPLOYMENT_PLATFORM_INSTRUCTION} for full functionality.`,
+          `🚨 CRITICAL WARNING: ${envVar.key} is NOT SET. ${envVar.description}. Set it in ${DEPLOYMENT_PLATFORM_LOCATION} for full functionality.`,
         );
       } else if (this.isPlaceholder(value)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: ${envVar.key} is using a placeholder value. Update it immediately in ${DEPLOYMENT_PLATFORM_INSTRUCTION}.`,
+          `🚨 CRITICAL WARNING: ${envVar.key} is using a placeholder value. Update it immediately in ${DEPLOYMENT_PLATFORM_LOCATION}.`,
         );
       }
     }
@@ -195,11 +195,11 @@ export class EnvironmentValidator {
       const corsOrigins = process.env.CORS_ALLOWED_ORIGINS;
       if (this.isEmptyOrWhitespace(corsOrigins)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is NOT SET in production. CORS will be disabled and API requests from frontend will fail. ${DEPLOYMENT_PLATFORM_INSTRUCTION}.`,
+          `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is NOT SET in production. CORS will be disabled and API requests from frontend will fail. Set it in ${DEPLOYMENT_PLATFORM_LOCATION}.`,
         );
       } else if (this.isPlaceholder(corsOrigins)) {
         warnings.push(
-          `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value. Update it immediately in ${DEPLOYMENT_PLATFORM_INSTRUCTION}.`,
+          `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value. Update it immediately in ${DEPLOYMENT_PLATFORM_LOCATION}.`,
         );
       }
     }
