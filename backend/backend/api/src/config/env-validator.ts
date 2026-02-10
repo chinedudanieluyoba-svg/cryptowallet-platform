@@ -25,14 +25,18 @@ const REQUIRED_ENV_VARS: EnvVar[] = [
     description: 'Secret for signing JWT tokens',
   },
   {
-    key: 'MOONPAY_WEBHOOK_SECRET',
-    required: true,
-    description: 'MoonPay webhook signature verification secret',
-  },
-  {
     key: 'NODE_ENV',
     required: true,
     description: 'Environment (development/staging/production)',
+  },
+];
+
+const OPTIONAL_SECRETS: EnvVar[] = [
+  {
+    key: 'MOONPAY_WEBHOOK_SECRET',
+    required: false,
+    description:
+      'MoonPay webhook signature verification secret (webhook validation will fail without this)',
   },
 ];
 
@@ -153,16 +157,28 @@ export class EnvironmentValidator {
       }
     }
 
-    // PRODUCTION ONLY: Require CORS_ALLOWED_ORIGINS
+    // Check optional secrets (warn if missing or placeholder, but don't fail)
+    for (const envVar of OPTIONAL_SECRETS) {
+      const value = process.env[envVar.key];
+
+      if (!value || value.trim() === '') {
+        warnings.push(
+          `🚨 CRITICAL WARNING: ${envVar.key} is NOT SET. ${envVar.description}. Set it in your deployment platform (e.g., Render Dashboard → Environment) for full functionality.`,
+        );
+      } else if (value === 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD') {
+        warnings.push(
+          `🚨 CRITICAL WARNING: ${envVar.key} is using a placeholder value. Update it immediately in your deployment platform (e.g., Render Dashboard → Environment).`,
+        );
+      }
+    }
+
+    // PRODUCTION: Warn about CORS_ALLOWED_ORIGINS (allow empty but warn)
     if (nodeEnv === 'production') {
       const corsOrigins = process.env.CORS_ALLOWED_ORIGINS;
       if (!corsOrigins || corsOrigins.trim() === '') {
-        missing.push({
-          key: 'CORS_ALLOWED_ORIGINS',
-          required: true,
-          description:
-            'Comma-separated list of allowed CORS origins (REQUIRED in production)',
-        });
+        warnings.push(
+          `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is NOT SET in production. CORS will be disabled and API requests from frontend will fail. Set it in your deployment platform (e.g., Render Dashboard → Environment).`,
+        );
       } else if (corsOrigins === 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD') {
         warnings.push(
           `🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value. Update it immediately in your deployment platform (e.g., Render Dashboard → Environment).`,
