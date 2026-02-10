@@ -30,6 +30,23 @@ describe('EnvironmentValidator', () => {
     expect(() => EnvironmentValidator.validate()).not.toThrow();
   });
 
+  it('should pass validation with only strictly required variables (no optional secrets)', () => {
+    process.env.NODE_ENV = 'development';
+    process.env.DATABASE_URL_DEV = 'postgresql://user:pass@localhost:5432/db';
+    process.env.JWT_SECRET = 'test-secret-key-min-32-characters-long';
+    delete process.env.MOONPAY_WEBHOOK_SECRET;
+
+    expect(() => EnvironmentValidator.validate()).not.toThrow();
+    
+    // Should log warning about missing MOONPAY_WEBHOOK_SECRET
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '\n⚠️  Optional environment variables not set (using defaults):',
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
+      '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is NOT SET',
+    ));
+  });
+
   it('should throw error when NODE_ENV is missing', () => {
     delete process.env.NODE_ENV;
 
@@ -63,18 +80,24 @@ describe('EnvironmentValidator', () => {
     expect(() => EnvironmentValidator.validate()).toThrow('JWT_SECRET');
   });
 
-  it('should throw error when MOONPAY_WEBHOOK_SECRET is missing', () => {
+  it('should NOT throw error when MOONPAY_WEBHOOK_SECRET is missing (but should warn)', () => {
     process.env.NODE_ENV = 'development';
     process.env.DATABASE_URL_DEV = 'postgresql://user:pass@localhost:5432/db';
     process.env.JWT_SECRET = 'test-secret';
     delete process.env.MOONPAY_WEBHOOK_SECRET;
 
-    expect(() => EnvironmentValidator.validate()).toThrow(
-      'MOONPAY_WEBHOOK_SECRET',
+    expect(() => EnvironmentValidator.validate()).not.toThrow();
+    
+    // Verify warning is logged
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '\n⚠️  Optional environment variables not set (using defaults):',
     );
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
+      '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is NOT SET',
+    ));
   });
 
-  it('should throw error listing ALL missing required variables', () => {
+  it('should throw error listing ALL missing required variables (excluding optional MOONPAY_WEBHOOK_SECRET)', () => {
     process.env.NODE_ENV = 'development';
     delete process.env.DATABASE_URL_DEV;
     delete process.env.JWT_SECRET;
@@ -82,7 +105,8 @@ describe('EnvironmentValidator', () => {
 
     expect(() => EnvironmentValidator.validate()).toThrow('DATABASE_URL_DEV');
     expect(() => EnvironmentValidator.validate()).toThrow('JWT_SECRET');
-    expect(() => EnvironmentValidator.validate()).toThrow(
+    // MOONPAY_WEBHOOK_SECRET is now optional, so it shouldn't throw
+    expect(() => EnvironmentValidator.validate()).not.toThrow(
       'MOONPAY_WEBHOOK_SECRET',
     );
   });
@@ -102,16 +126,22 @@ describe('EnvironmentValidator', () => {
     expect(() => EnvironmentValidator.validate()).not.toThrow();
   });
 
-  it('should require CORS_ALLOWED_ORIGINS in production', () => {
+  it('should NOT require CORS_ALLOWED_ORIGINS in production (but should warn)', () => {
     process.env.NODE_ENV = 'production';
     process.env.DATABASE_URL_PROD = 'postgresql://user:pass@localhost:5432/db';
     process.env.JWT_SECRET = 'test-secret';
     process.env.MOONPAY_WEBHOOK_SECRET = 'moonpay-secret';
     delete process.env.CORS_ALLOWED_ORIGINS;
 
-    expect(() => EnvironmentValidator.validate()).toThrow(
-      'CORS_ALLOWED_ORIGINS',
+    expect(() => EnvironmentValidator.validate()).not.toThrow();
+    
+    // Verify warning is logged
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '\n⚠️  Optional environment variables not set (using defaults):',
     );
+    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
+      '🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is NOT SET in production',
+    ));
   });
 
   it('should not require CORS_ALLOWED_ORIGINS in development', () => {
