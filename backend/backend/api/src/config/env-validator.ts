@@ -258,12 +258,10 @@ export class EnvironmentValidator {
 
     // Log environment info
     console.log(`📦 NODE_ENV: ${process.env.NODE_ENV}`);
-    if (dbUrl) {
-      console.log(`🗄️  DATABASE: ${this.maskConnectionString(dbUrl)}`);
-    }
-    if (process.env.JWT_SECRET) {
-      console.log(`🔐 JWT_SECRET: ${this.maskSecret(process.env.JWT_SECRET)}`);
-    }
+    // After validation passes, dbUrl and JWT_SECRET are guaranteed to be set
+    // (either with real values or placeholders)
+    console.log(`🗄️  DATABASE: ${this.maskConnectionString(dbUrl!)}`);
+    console.log(`🔐 JWT_SECRET: ${this.maskSecret(process.env.JWT_SECRET!)}`);
     console.log('');
   }
 
