@@ -41,7 +41,7 @@ This guide walks you through deploying the Crypto Wallet Platform API to [Render
 
 ### 3. Set Environment Variables (Optional)
 
-**Note:** If you're using the `render.yaml` Blueprint deployment, most environment variables are automatically configured with placeholder values. The app will start successfully, and you can update the secrets later in the Render Dashboard.
+**Note:** If you're using the `render.yaml` Blueprint deployment, all required environment variables are automatically configured with placeholder values. The app will start successfully with warnings, allowing you to update the secrets after the initial deployment completes.
 
 **For Manual Deployment:** Click **"Environment"** tab and add these variables:
 
@@ -50,8 +50,8 @@ This guide walks you through deploying the Crypto Wallet Platform API to [Render
 | Variable | Value | How to Get |
 |----------|-------|------------|
 | `NODE_ENV` | `production` | Fixed value (auto-set in Blueprint) |
-| `DATABASE_URL_PROD` | `postgresql://user:pass@host/db` | From Step 1 (auto-linked in Blueprint) |
-| `JWT_SECRET` | Generate secure secret | Auto-generated in Blueprint. Manual: `openssl rand -base64 32` |
+| `DATABASE_URL_PROD` | `postgresql://user:pass@host/db` | From Step 1. Blueprint sets placeholder - update after first deploy |
+| `JWT_SECRET` | Generate secure secret | Blueprint sets placeholder. Update with: `openssl rand -base64 32` or use Render's Generate button |
 | `MOONPAY_WEBHOOK_SECRET` | Your MoonPay secret | From [MoonPay Dashboard](https://www.moonpay.com/dashboard). Placeholder set in Blueprint - update after first deploy |
 | `CORS_ALLOWED_ORIGINS` | `https://yourdomain.com` | Your frontend domain(s), comma-separated. Placeholder set in Blueprint - update after first deploy |
 
@@ -80,17 +80,22 @@ This guide walks you through deploying the Crypto Wallet Platform API to [Render
    ```
    ✅ Environment variables validated
    ⚠️  Optional environment variables not set (using defaults):
+      🚨 CRITICAL WARNING: DATABASE_URL_PROD is using a placeholder value.
+      🚨 CRITICAL WARNING: JWT_SECRET is using a placeholder value.
       🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is using a placeholder value.
       🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value.
    📦 NODE_ENV: production
-   🗄️  DATABASE: postgresql://user:***@...
-   🔐 JWT_SECRET: a3f2...k8j9 (64 chars)
+   🗄️  DATABASE: PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD (masked)
+   🔐 JWT_SECRET: PLAC...HBOARD (masked)
    🚀 Application listening on port 10000
    ```
-4. **Important:** If you see the "CRITICAL WARNING" messages, update the placeholder values:
-   - Go to **Environment** tab
-   - Update `MOONPAY_WEBHOOK_SECRET` and `CORS_ALLOWED_ORIGINS` with real values
-   - Render will automatically restart the service
+4. **Important:** Update all placeholder values immediately after first deployment:
+   - Go to **Environment** tab in Render Dashboard
+   - Update `DATABASE_URL_PROD` with the Internal Database URL from your PostgreSQL service
+   - Update `JWT_SECRET` with a secure random value (`openssl rand -base64 32` or use Render's Generate button)
+   - Update `MOONPAY_WEBHOOK_SECRET` with your actual MoonPay webhook secret
+   - Update `CORS_ALLOWED_ORIGINS` with your actual frontend domain(s)
+   - Click "Save Changes" - Render will automatically restart the service
 
 ### 5. Run Database Migrations
 

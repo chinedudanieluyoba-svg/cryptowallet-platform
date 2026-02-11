@@ -37,14 +37,16 @@ describe('EnvironmentValidator', () => {
     delete process.env.MOONPAY_WEBHOOK_SECRET;
 
     expect(() => EnvironmentValidator.validate()).not.toThrow();
-    
+
     // Should log warning about missing MOONPAY_WEBHOOK_SECRET
     expect(consoleLogSpy).toHaveBeenCalledWith(
       '\n⚠️  Optional environment variables not set (using defaults):',
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
-      '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is NOT SET',
-    ));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is NOT SET',
+      ),
+    );
   });
 
   it('should throw error when NODE_ENV is missing', () => {
@@ -87,14 +89,16 @@ describe('EnvironmentValidator', () => {
     delete process.env.MOONPAY_WEBHOOK_SECRET;
 
     expect(() => EnvironmentValidator.validate()).not.toThrow();
-    
+
     // Verify warning is logged
     expect(consoleLogSpy).toHaveBeenCalledWith(
       '\n⚠️  Optional environment variables not set (using defaults):',
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
-      '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is NOT SET',
-    ));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is NOT SET',
+      ),
+    );
   });
 
   it('should throw error listing ALL missing required variables (excluding optional MOONPAY_WEBHOOK_SECRET)', () => {
@@ -134,14 +138,16 @@ describe('EnvironmentValidator', () => {
     delete process.env.CORS_ALLOWED_ORIGINS;
 
     expect(() => EnvironmentValidator.validate()).not.toThrow();
-    
+
     // Verify warning is logged
     expect(consoleLogSpy).toHaveBeenCalledWith(
       '\n⚠️  Optional environment variables not set (using defaults):',
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
-      '🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is NOT SET in production',
-    ));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is NOT SET in production',
+      ),
+    );
   });
 
   it('should not require CORS_ALLOWED_ORIGINS in development', () => {
@@ -158,17 +164,20 @@ describe('EnvironmentValidator', () => {
     process.env.NODE_ENV = 'development';
     process.env.DATABASE_URL_DEV = 'postgresql://user:pass@localhost:5432/db';
     process.env.JWT_SECRET = 'test-secret';
-    process.env.MOONPAY_WEBHOOK_SECRET = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
+    process.env.MOONPAY_WEBHOOK_SECRET =
+      'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
 
     expect(() => EnvironmentValidator.validate()).not.toThrow();
-    
+
     // Verify warning is logged
     expect(consoleLogSpy).toHaveBeenCalledWith(
       '\n⚠️  Optional environment variables not set (using defaults):',
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
-      '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is using a placeholder value',
-    ));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is using a placeholder value',
+      ),
+    );
   });
 
   it('should accept placeholder values but log warnings for CORS_ALLOWED_ORIGINS in production', () => {
@@ -179,34 +188,113 @@ describe('EnvironmentValidator', () => {
     process.env.CORS_ALLOWED_ORIGINS = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
 
     expect(() => EnvironmentValidator.validate()).not.toThrow();
-    
+
     // Verify warning is logged
     expect(consoleLogSpy).toHaveBeenCalledWith(
       '\n⚠️  Optional environment variables not set (using defaults):',
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
-      '🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value',
-    ));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value',
+      ),
+    );
   });
 
   it('should accept placeholder values but log warnings for both secrets in production', () => {
     process.env.NODE_ENV = 'production';
     process.env.DATABASE_URL_PROD = 'postgresql://user:pass@localhost:5432/db';
     process.env.JWT_SECRET = 'test-secret';
-    process.env.MOONPAY_WEBHOOK_SECRET = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
+    process.env.MOONPAY_WEBHOOK_SECRET =
+      'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
     process.env.CORS_ALLOWED_ORIGINS = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
 
     expect(() => EnvironmentValidator.validate()).not.toThrow();
-    
+
     // Verify both warnings are logged
     expect(consoleLogSpy).toHaveBeenCalledWith(
       '\n⚠️  Optional environment variables not set (using defaults):',
     );
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
-      '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is using a placeholder value',
-    ));
-    expect(consoleLogSpy).toHaveBeenCalledWith(expect.stringContaining(
-      '🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value',
-    ));
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is using a placeholder value',
+      ),
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value',
+      ),
+    );
+  });
+
+  it('should accept placeholder value for JWT_SECRET but log warning', () => {
+    process.env.NODE_ENV = 'development';
+    process.env.DATABASE_URL_DEV = 'postgresql://user:pass@localhost:5432/db';
+    process.env.JWT_SECRET = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
+
+    expect(() => EnvironmentValidator.validate()).not.toThrow();
+
+    // Verify warning is logged
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '\n⚠️  Optional environment variables not set (using defaults):',
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: JWT_SECRET is using a placeholder value',
+      ),
+    );
+  });
+
+  it('should accept placeholder value for DATABASE_URL_PROD but log warning', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.DATABASE_URL_PROD = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
+    process.env.JWT_SECRET = 'test-secret-key-min-32-characters-long';
+
+    expect(() => EnvironmentValidator.validate()).not.toThrow();
+
+    // Verify warning is logged
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '\n⚠️  Optional environment variables not set (using defaults):',
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: DATABASE_URL_PROD is using a placeholder value',
+      ),
+    );
+  });
+
+  it('should accept placeholder values for all required secrets in production', () => {
+    process.env.NODE_ENV = 'production';
+    process.env.DATABASE_URL_PROD = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
+    process.env.JWT_SECRET = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
+    process.env.MOONPAY_WEBHOOK_SECRET =
+      'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
+    process.env.CORS_ALLOWED_ORIGINS = 'PLACEHOLDER_UPDATE_IN_RENDER_DASHBOARD';
+
+    expect(() => EnvironmentValidator.validate()).not.toThrow();
+
+    // Verify all warnings are logged
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      '\n⚠️  Optional environment variables not set (using defaults):',
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: DATABASE_URL_PROD is using a placeholder value',
+      ),
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: JWT_SECRET is using a placeholder value',
+      ),
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: MOONPAY_WEBHOOK_SECRET is using a placeholder value',
+      ),
+    );
+    expect(consoleLogSpy).toHaveBeenCalledWith(
+      expect.stringContaining(
+        '🚨 CRITICAL WARNING: CORS_ALLOWED_ORIGINS is using a placeholder value',
+      ),
+    );
   });
 });
