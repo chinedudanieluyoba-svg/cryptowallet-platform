@@ -2,49 +2,94 @@
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "npm run build"
+    "buildCommand": "cd backend && npx prisma generate && npm run build"
   },
   "deploy": {
-    "startCommand": "npm run start:prod",
+    "startCommand": "cd backend && node dist/src/main.js",
     "restartPolicyType": "ON_FAILURE",
     "restartPolicyMaxRetries": 10,
-    "cron": [
-      {
-        "name": "hourly-tasks",
-        "schedule": "0 * * * *",
-        "command": "npm run cron"
-      }
-    ],
-    "healthCheckPath": "/health"
+    "healthCheckPath": "/health",
+    "healthCheckTimeout": 10,
+    "healthCheckInterval": 30
   },
-  "env": {
-    "DATABASE_URL": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD",
-    "PGUSER": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD",
-    "PGPASSWORD": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD",
-    "PGHOST": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD",
-    "PGPORT": "5432",
-    "PGDATABASE": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD",
-    "JWT_SECRET": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD",
-    "JWT_REFRESH_SECRET": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD",
-    "NODE_ENV": "production",
-    "PORT": "3000"
+  "variables": {
+    "DATABASE_URL": {
+      "description": "PostgreSQL connection string (from Neon serverless adapter)",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "DATABASE_URL_PROD": {
+      "description": "Production database URL",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "JWT_SECRET": {
+      "description": "JWT access token signing secret (cryptographically secure, 32+ chars)",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "JWT_REFRESH_SECRET": {
+      "description": "JWT refresh token signing secret (cryptographically secure, 32+ chars)",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "NODE_ENV": {
+      "description": "Node.js environment",
+      "value": "production"
+    },
+    "PORT": {
+      "description": "Server port",
+      "value": "3000"
+    },
+    "LOG_LEVEL": {
+      "description": "Logging level: error, warn, log, debug, verbose",
+      "value": "error"
+    },
+    "CORS_ORIGINS": {
+      "description": "Comma-separated list of allowed CORS origins (e.g., https://your-frontend.vercel.app)",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "API_KEY": {
+      "description": "Internal API authentication key",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "ADMIN_API_KEY": {
+      "description": "Admin endpoint API key for reconciliation endpoints",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "WEBHOOK_SECRET": {
+      "description": "Secret for verifying incoming webhooks (e.g., MoonPay)",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "MOONPAY_API_KEY": {
+      "description": "MoonPay API key for on-ramp integration",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "MOONPAY_SECRET_KEY": {
+      "description": "MoonPay secret key for webhook verification",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "SESSION_SECRET": {
+      "description": "Secret for session management",
+      "value": "PLACEHOLDER_UPDATE_IN_RAILWAY_DASHBOARD"
+    },
+    "RATE_LIMIT_WINDOW_MS": {
+      "description": "Rate limit window in milliseconds",
+      "value": "60000"
+    },
+    "RATE_LIMIT_MAX_REQUESTS": {
+      "description": "Max requests per rate limit window",
+      "value": "100"
+    },
+    "WEBHOOK_RETRY_MAX_ATTEMPTS": {
+      "description": "Maximum webhook retry attempts",
+      "value": "3"
+    },
+    "WEBHOOK_TIMEOUT_MS": {
+      "description": "Webhook request timeout in milliseconds",
+      "value": "10000"
+    }
   },
   "providers": [
     {
       "name": "nodejs",
       "version": "20"
-    },
-    {
-      "name": "typescript",
-      "version": "5.2"
-    },
-    {
-      "name": "prisma",
-      "version": "5.0"
-    },
-    {
-      "name": "npm",
-      "version": "10.2"
     }
   ]
 }
