@@ -14,12 +14,8 @@
   },
   "dependencies": {
     "@nestjs/typeorm": "^11.0.0",
-    "@prisma/client": "^7.3.0",
     "pg": "^8.17.2",
     "typeorm": "^0.3.28"
-  },
-  "devDependencies": {
-    "prisma": "^7.3.0"
   },
   "engines": {
     "node": ">=20.x"

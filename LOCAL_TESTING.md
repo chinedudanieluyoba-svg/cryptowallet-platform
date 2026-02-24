@@ -176,17 +176,19 @@ Both applications build successfully:
 Backend Docker build uses this layer order for dependency caching:
 
 ```dockerfile
-COPY package*.json ./
+WORKDIR /app
+COPY backend/package*.json ./
 RUN npm ci
-COPY . .
+COPY backend .
+RUN npx prisma generate
 RUN npm run build
 ```
 
 Build and run:
 
 ```bash
-cd backend
-docker build -t cryptowallet-api .
+cd /workspaces/cryptowallet-platform
+docker build -f backend/Dockerfile -t cryptowallet-api .
 docker run --rm -p 3000:3000 --env-file .env cryptowallet-api
 ```
 

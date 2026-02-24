@@ -463,10 +463,10 @@ For production deployment, you **must** set these variables:
 ```dockerfile
 FROM node:20-alpine
 WORKDIR /app
-COPY package*.json ./
-RUN npm ci --only=production
-COPY . .
-RUN npm run prisma:generate
+COPY backend/package*.json ./
+RUN npm ci
+COPY backend .
+RUN npx prisma generate
 RUN npm run build
 CMD ["npm", "run", "start:prod"]
 ```
