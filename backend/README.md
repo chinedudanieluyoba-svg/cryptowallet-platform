@@ -8,7 +8,7 @@ Production-grade cryptocurrency wallet platform with comprehensive reconciliatio
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-336791?logo=postgresql)](https://www.postgresql.org/)
 [![Tests](https://img.shields.io/badge/Tests-84%20passed-success)](./docs/ARCHITECTURE.md)
 
-## 🎯 Core Philosophy
+## Core Philosophy
 
 **Detect-First, Fix-Second**
 
@@ -22,7 +22,7 @@ This system is designed with the principle that **financial data should never be
 
 > *"If something breaks, we'll know — and we can prove what happened."*
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 - Node.js 18+
@@ -73,19 +73,21 @@ curl http://localhost:3000/wallet/<wallet-id>/balance \
   -H "Authorization: Bearer <your-token>"
 ```
 
-## 📚 Documentation
+## Documentation
 
 | Document | Description |
 |----------|-------------|
 | [Architecture](./docs/ARCHITECTURE.md) | System design, data flows, and deployment |
 | [API Reference](./docs/API_REFERENCE.md) | Complete REST API documentation |
-| [**Deployment Guide (Render)**](./docs/DEPLOYMENT_RENDER.md) | **Step-by-step production deployment** |
+| [**Backend Deployment Guide (Railway)**](./docs/DEPLOYMENT_RAILWAY.md) | **Backend service deployment on Railway** |
+| [Railway Troubleshooting](./docs/DEPLOYMENT_RAILWAY.md#troubleshooting) | Common Railway deployment failures and quick fixes |
+| [Platform Deployment (Railway + Vercel + Neon)](../docs/deployment.md) | Monorepo topology and frontend/backend split |
 | [Database Safety](./docs/DATABASE_SAFETY.md) | Migration procedures and backup strategy |
 | [Secrets Management](./docs/SECRETS_AND_ACCESS_CONTROL.md) | Security controls and rotation procedures |
 | [Rate Limiting](./docs/RATE_LIMITING.md) | Abuse protection and rate limit configuration |
 | [Database Operations](./docs/DATABASE_OPERATIONS.md) | Daily operations and troubleshooting |
 
-## 🏗️ Architecture Overview
+## Architecture Overview
 
 ```
 ┌─────────────────┐
@@ -244,7 +246,7 @@ Structured logs for:
 }
 ```
 
-## 🔧 Development
+## Development
 
 ### Available Scripts
 
@@ -360,7 +362,7 @@ src/
     └── admin-access.logger.spec.ts
 ```
 
-## 🔐 Security
+## Security
 
 ### Authentication
 - JWT with 15-minute expiration
@@ -384,7 +386,7 @@ src/
 
 See [SECRETS_AND_ACCESS_CONTROL.md](./docs/SECRETS_AND_ACCESS_CONTROL.md) for details.
 
-## 📊 API Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description | Rate Limit |
 |--------|----------|-------------|------------|
@@ -406,34 +408,34 @@ See [SECRETS_AND_ACCESS_CONTROL.md](./docs/SECRETS_AND_ACCESS_CONTROL.md) for de
 
 See [API_REFERENCE.md](./docs/API_REFERENCE.md) for complete documentation.
 
-## 🚢 Deployment
+## Deployment
 
 ### Deployment Guides
 
 Choose your deployment platform:
 
-- **[Render](./docs/DEPLOYMENT_RENDER.md)** - Easiest setup, managed PostgreSQL, free tier available
+- **[Railway + Vercel + Neon](../docs/deployment.md)** - Recommended monorepo setup
 - **[Docker](./docs/ARCHITECTURE.md)** - Self-hosted, full control
 - **[Kubernetes](./docs/ARCHITECTURE.md)** - Enterprise scale, complex setup
 
-### Quick Deploy to Render
+### Quick Deploy to Railway
 
-1. **One-Click Deploy**: Use `render.yaml` (in repository root)
+1. **Project Setup**: Use Railway with `railway.toml` (in repository root)
    ```bash
-   # Commit render.yaml to your repo (already included)
+  # Commit railway.toml to your repo (already included)
    git push origin main
-   
-   # Go to Render Dashboard → New → Blueprint
-   # Connect repository → Render creates everything automatically
+
+  # Go to Railway Dashboard → New Project
+  # Connect repository → select backend service
    ```
 
-2. **Manual Setup**: Follow [Render Deployment Guide](./docs/DEPLOYMENT_RENDER.md)
+2. **Manual Setup**: Follow [Backend Deployment Guide](./docs/DEPLOYMENT_RAILWAY.md)
 
 ### Production Checklist
 
-- [ ] Environment variables configured (see [Render Guide](./docs/DEPLOYMENT_RENDER.md))
+- [ ] Environment variables configured (see [Backend Deployment Guide](./docs/DEPLOYMENT_RAILWAY.md))
 - [ ] Database migrations deployed (`npm run migrate:deploy`)
-- [ ] SSL certificates installed (automatic on Render)
+- [ ] SSL/TLS enabled (managed by Railway)
 - [ ] CORS origins configured (`CORS_ALLOWED_ORIGINS`)
 - [ ] Webhook IP allowlist set (optional: `WEBHOOK_ALLOWED_IPS`)
 - [ ] Secrets rotation dates tracked
@@ -449,12 +451,12 @@ For production deployment, you **must** set these variables:
 | Variable | Description | Example |
 |----------|-------------|---------|
 | `NODE_ENV` | Environment | `production` |
-| `DATABASE_URL_PROD` | PostgreSQL connection | `postgresql://user:pass@host/db` |
+| `DATABASE_URL` | PostgreSQL connection | `postgresql://user:pass@host/db` |
 | `JWT_SECRET` | JWT signing secret | Generate: `openssl rand -base64 32` |
 | `MOONPAY_WEBHOOK_SECRET` | MoonPay webhook secret | From MoonPay dashboard |
 | `CORS_ALLOWED_ORIGINS` | Allowed frontend domains | `https://app.yourdomain.com` |
 
-**See [Deployment Guide](./docs/DEPLOYMENT_RENDER.md) for complete setup instructions.**
+**See [Backend Deployment Guide](./docs/DEPLOYMENT_RAILWAY.md) for backend setup and [Platform Deployment Guide](../docs/deployment.md) for full architecture.**
 
 ### Docker Deployment
 
@@ -489,7 +491,7 @@ readinessProbe:
 
 See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for deployment architecture.
 
-## 📈 Performance
+## Performance
 
 **Target Metrics:**
 - p50 latency: <50ms
@@ -505,7 +507,7 @@ See [ARCHITECTURE.md](./docs/ARCHITECTURE.md) for deployment architecture.
 - `status` on WebhookEvent, AlertLog
 - `createdAt` on all tables
 
-## 🐛 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -550,11 +552,11 @@ See [DATABASE_OPERATIONS.md](./docs/DATABASE_OPERATIONS.md) for operations guide
 - Follow existing code style
 - Add audit logging for sensitive operations
 
-## 📝 License
+## License
 
 MIT License - see [LICENSE](../../../LICENSE) for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
 Built with:
 - [NestJS](https://nestjs.com/) - Progressive Node.js framework
@@ -562,7 +564,7 @@ Built with:
 - [PostgreSQL](https://www.postgresql.org/) - Powerful open-source database
 - [Neon](https://neon.tech/) - Serverless PostgreSQL
 
-## 📞 Support
+## Support
 
 - Documentation: [docs/](./docs/)
 - Issues: [GitHub Issues](https://github.com/yourusername/cryptowallet-platform/issues)
