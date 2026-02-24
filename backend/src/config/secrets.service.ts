@@ -38,13 +38,10 @@ export class SecretsService {
     // JWT Secret
     secrets.push(this.checkSecret('JWT_SECRET', 'JWT_SECRET_ROTATION_DATE'));
 
-    // Database credentials
-    const nodeEnv = process.env.NODE_ENV;
-    if (nodeEnv === 'production') {
-      secrets.push(
-        this.checkSecret('DATABASE_URL', 'DB_CREDENTIALS_ROTATION_DATE'),
-      );
-    }
+    // Database credentials (required in all environments)
+    secrets.push(
+      this.checkSecret('DATABASE_URL', 'DB_CREDENTIALS_ROTATION_DATE'),
+    );
 
     // Payment provider secrets
     secrets.push(
