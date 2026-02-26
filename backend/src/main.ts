@@ -31,6 +31,9 @@ async function bootstrap() {
     });
     console.log(`✅ CORS enabled for: ${prodConfig.corsOrigins.join(', ')}`);
   } else if (prodConfig.isProduction) {
+    // Enable CORS middleware even with no origins so OPTIONS pre-flight requests
+    // (e.g. health checks) are handled correctly and do not return 404.
+    app.enableCors({ origin: [] });
     console.warn('⚠️  CORS disabled in production - no origins configured');
   } else {
     // Development: Allow all origins
