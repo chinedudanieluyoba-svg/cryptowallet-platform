@@ -1,5 +1,10 @@
 import { PrismaClient } from '@prisma/client';
 import { PrismaNeon } from '@prisma/adapter-neon';
+import { neonConfig } from '@neondatabase/serverless';
+import ws from 'ws';
+
+// Required for Node.js environments without native WebSocket support (Node.js < 22)
+neonConfig.webSocketConstructor = ws;
 
 const dbUrl = process.env.DATABASE_URL;
 
