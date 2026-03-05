@@ -2,50 +2,26 @@ import 'dotenv/config'; // ⚡ Load .env file before any code reads process.env
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { EnvironmentValidator } from './config/env-validator';
-import { ProductionConfigService } from './config/production.config';
 import { ProductionExceptionFilter } from './common/filters/production-exception.filter';
 
 async function bootstrap() {
   // ⚡ FAIL FAST: Validate required environment variables before app starts
   EnvironmentValidator.validate();
 
-  // Load production config
-  const prodConfig = ProductionConfigService.getConfig();
+  const app = await NestFactory.create(AppModule);
 
-  // Create app with production-safe logging
-  const app = await NestFactory.create(AppModule, {
-    logger: prodConfig.isProduction
-      ? ['error'] // Production: Only errors
-      : prodConfig.isStaging
-        ? ['error', 'warn'] // Staging: Errors + warnings
-        : ['error', 'warn', 'log', 'debug', 'verbose'], // Development: Full logging
+  app.setGlobalPrefix('api');
+
+  app.enableCors({
+    origin: [
+      'https://iron-vault-wallet.com',
+      'https://www.iron-vault-wallet.com'
+    ],
+    credentials: true,
   });
-
-  // 🔒 CORS: Lock down to known domains in production
-  if (prodConfig.corsOrigins.length > 0) {
-    app.enableCors({
-      origin: prodConfig.corsOrigins,
-      credentials: true,
-      methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-      allowedHeaders: ['Content-Type', 'Authorization'],
-    });
-    console.log(`✅ CORS enabled for: ${prodConfig.corsOrigins.join(', ')}`);
-  } else if (prodConfig.isProduction) {
-    // Enable CORS middleware even with no origins so OPTIONS pre-flight requests
-    // (e.g. health checks) are handled correctly and do not return 404.
-    app.enableCors({ origin: [] });
-    console.warn('⚠️  CORS disabled in production - no origins configured');
-  } else {
-    // Development: Allow all origins
-    app.enableCors();
-    console.log('⚠️  CORS enabled for all origins (development mode)');
-  }
 
   // 🔒 Global exception filter: Hide stack traces in production
   app.useGlobalFilters(new ProductionExceptionFilter());
-
-  // Log production config
-  ProductionConfigService.logConfig();
 
   const port = process.env.PORT ?? 3000;
   // Enable NestJS built-in shutdown hooks so SIGTERM/SIGINT trigger
