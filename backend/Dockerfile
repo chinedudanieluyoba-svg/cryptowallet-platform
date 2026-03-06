@@ -2,13 +2,14 @@ FROM node:20-alpine
 
 WORKDIR /app
 
-COPY backend/package*.json ./
-RUN npm ci
+COPY package*.json ./
+COPY backend/package*.json ./backend/
+RUN cd backend && npm ci
 
-COPY backend .
-RUN npx prisma generate
-RUN npm run build
+COPY backend ./backend/
+RUN cd backend && npx prisma generate
+RUN cd backend && npm run build
 
 EXPOSE 3000
 
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/src/main.js"]
+CMD ["sh", "-c", "npm run migrate && npm run start"]
