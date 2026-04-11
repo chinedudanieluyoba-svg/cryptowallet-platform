@@ -1,0 +1,1 @@
+{ "version": 2, "buildCommand": "cd web && npm run build", "installCommand": "npm install && npm install --prefix web", "projects": { "backend": { "name": "backend", "use": "@vercel/node" }, "web": { "name": "web", "use": "@vercel/next" } } }
