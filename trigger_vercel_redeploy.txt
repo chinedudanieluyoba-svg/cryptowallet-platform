@@ -1,0 +1,3 @@
+# Trigger Vercel Redeploy
+
+This commit is made to trigger a redeploy on Vercel.
